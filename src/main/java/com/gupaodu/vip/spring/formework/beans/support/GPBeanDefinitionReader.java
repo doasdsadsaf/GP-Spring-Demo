@@ -1,7 +1,6 @@
 package com.gupaodu.vip.spring.formework.beans.support;
 
 import com.gupaodu.vip.spring.formework.beans.config.GPBeanDefinition;
-import com.sun.org.apache.xpath.internal.operations.Or;
 
 import java.io.File;
 import java.io.IOException;

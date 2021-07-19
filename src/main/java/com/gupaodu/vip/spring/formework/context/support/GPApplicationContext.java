@@ -10,7 +10,12 @@ import com.gupaodu.vip.spring.formework.beans.support.GPBeanDefinitionReader;
 import com.gupaodu.vip.spring.formework.beans.support.GPDefaultListableBeanFactory;
 import com.gupaodu.vip.spring.formework.core.GPBeanFactory;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.RandomAccessFile;
 import java.lang.reflect.Field;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -176,6 +181,51 @@ public class GPApplicationContext extends GPDefaultListableBeanFactory implement
 
     public Properties getConfig() {
         return this.reader.getConfig();
+    }
+
+    public static void main(String[] args) {
+        RandomAccessFile aFile = null;
+        try {
+            /**
+             * r 以只读的方式打开文本，也就意味着不能用write来操作文件
+             * rw	读操作和写操作都是允许的
+             * rws	每当进行写操作，同步的刷新到磁盘，刷新内容和元数据
+             * rwd	每当进行写操作，同步的刷新到磁盘，刷新内容
+             */
+            //  new一个随机读取文件对象 传入name 文件路径, mode 权限
+            aFile = new RandomAccessFile("C:\\Users\\PC\\Desktop\\test.txt", "rw");
+            // 获取这个对象的管道 channel
+            FileChannel inChannel = aFile.getChannel();
+            // 创建容量为48字节的缓冲区
+            ByteBuffer buf = ByteBuffer.allocate(48);
+            // 管道读入缓冲区
+            int bytesRead = inChannel.read(buf);
+            // 循环 只要 不为 -1
+            while (bytesRead != -1) {
+                System.out.println("Read " + bytesRead);
+                // 使缓冲区准备好读取
+                buf.flip();
+                // 判断下一个要写入的元素小于总的列数,就读]
+                while (buf.hasRemaining()) {
+                    System.out.println(buf.get());
+                }
+                // 清空整个缓冲区
+                // 还有一个清空已读数据缓冲区方法
+                //compact()方法将所有未读的数据拷贝到Buffer起始处。
+                // 然后将position设到最后一个未读元素正后面。limit属性依然像clear()方法一样，设置成capacity。现在Buffer准备好写数据了，但是不会覆盖未读的数据。
+                buf.clear();
+                // 把缓冲区转为写
+                bytesRead = inChannel.read(buf);
+            }
+
+            aFile.close();
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
     }
 
 }
